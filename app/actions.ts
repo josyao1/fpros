@@ -4,11 +4,16 @@ import { getSupabase } from "@/lib/supabase";
 import { normalizeName } from "@/lib/match";
 import { ComparisonRow, PlayerRankingRow, ScoringFormat } from "@/lib/types";
 
+const MAX_ROWS = 1000;
+
 export async function saveRankings(
   scoringFormat: ScoringFormat,
   rows: ComparisonRow[]
 ): Promise<{ count: number }> {
   if (rows.length === 0) return { count: 0 };
+  if (rows.length > MAX_ROWS) {
+    throw new Error(`Too many players in one save (max ${MAX_ROWS}).`);
+  }
 
   const payload = rows.map((r) => ({
     normalized_name: normalizeName(r.name),
