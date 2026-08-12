@@ -1,9 +1,5 @@
-import RankingsApp from "@/components/RankingsApp";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
-      <RankingsApp />
-    </div>
-  );
+  redirect("/update-rankings");
 }

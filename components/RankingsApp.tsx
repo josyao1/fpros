@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import PasteBox from "./PasteBox";
 import ComparisonTable from "./ComparisonTable";
 import { parseEspn } from "@/lib/parseEspn";
 import { parseFpros } from "@/lib/parseFpros";
 import { buildComparison } from "@/lib/match";
 import { ScoringFormat, TabState } from "@/lib/types";
+import { saveRankings } from "@/app/actions";
 
 const TABS: { id: ScoringFormat; label: string }[] = [
   { id: "ppr", label: "PPR" },
@@ -83,6 +84,23 @@ export default function RankingsApp() {
   const matchedCount = rows.filter((r) => r.fprosRank !== null).length;
   const unmatchedCount = rows.length - matchedCount;
 
+  const [isSaving, startSaving] = useTransition();
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  const handleSave = () => {
+    setSaveMessage(null);
+    startSaving(async () => {
+      try {
+        const { count } = await saveRankings(activeTab, rows);
+        setSaveMessage(`Saved ${count} players to the Draft Board.`);
+      } catch (err) {
+        setSaveMessage(
+          err instanceof Error ? `Save failed: ${err.message}` : "Save failed."
+        );
+      }
+    });
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-10">
       <header className="flex flex-col gap-1">
@@ -133,15 +151,33 @@ export default function RankingsApp() {
       </div>
 
       {rows.length > 0 && (
-        <div className="flex flex-wrap gap-4 text-xs text-zinc-500 dark:text-zinc-400">
-          <span>{espnPlayers.length} ESPN players parsed</span>
-          <span>{fprosPlayers.length} FantasyPros players parsed</span>
-          <span>{matchedCount} matched</span>
-          {unmatchedCount > 0 && (
-            <span className="text-amber-600 dark:text-amber-400">
-              {unmatchedCount} unmatched
-            </span>
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-4 text-xs text-zinc-500 dark:text-zinc-400">
+            <span>{espnPlayers.length} ESPN players parsed</span>
+            <span>{fprosPlayers.length} FantasyPros players parsed</span>
+            <span>{matchedCount} matched</span>
+            {unmatchedCount > 0 && (
+              <span className="text-amber-600 dark:text-amber-400">
+                {unmatchedCount} unmatched
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {saveMessage && (
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                {saveMessage}
+              </span>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            >
+              {isSaving
+                ? "Saving..."
+                : `Save ${TABS.find((t) => t.id === activeTab)?.label} to Draft Board`}
+            </button>
+          </div>
         </div>
       )}
 
