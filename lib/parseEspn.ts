@@ -1,5 +1,6 @@
 import { EspnPlayer } from "./types";
 import { normalizeName } from "./match";
+import { cleanLines } from "./injury";
 
 const PURE_INT = /^\d+$/;
 const DECIMAL = /^-?\d+\.\d+$/;
@@ -64,10 +65,7 @@ function tryBlockAt(lines: string[], idx: number): Block | null {
  * paste.
  */
 export function parseEspn(raw: string): EspnPlayer[] {
-  const lines = raw
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
+  const lines = cleanLines(raw);
 
   const players: EspnPlayer[] = [];
   let i = 0;

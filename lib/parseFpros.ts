@@ -1,4 +1,6 @@
 import { FprosPlayer } from "./types";
+import { normalizeName } from "./match";
+import { cleanLines, stripInjurySuffix } from "./injury";
 
 const PURE_INT = /^\d+$/;
 const NAME_TEAM = /^(.+?)\s*\(([A-Za-z]{2,4})\)$/;
@@ -13,10 +15,7 @@ const POS_PREFIX = /^([A-Za-z]+)\d+/;
  * Position is pulled from the following line, e.g. "RB1    6    ...".
  */
 export function parseFpros(raw: string): FprosPlayer[] {
-  const lines = raw
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
+  const lines = cleanLines(raw);
 
   const players: FprosPlayer[] = [];
   let lastRank: number | null = null;
@@ -31,7 +30,9 @@ export function parseFpros(raw: string): FprosPlayer[] {
 
     const match = line.match(NAME_TEAM);
     if (match && lastRank !== null) {
-      const name = match[1].trim();
+      // An injury tag can land inside the captured name (e.g. "Name Q")
+      // rather than at the very end of the line, since "(TEAM)" follows it.
+      const name = stripInjurySuffix(match[1].trim());
       const team = match[2].toUpperCase();
 
       let pos = "";
@@ -44,13 +45,15 @@ export function parseFpros(raw: string): FprosPlayer[] {
     }
   }
 
-  // Same reasoning as parseEspn: chunked pastes can land out of order or
-  // overlap, so normalize by sorting on rank and dropping duplicate ranks.
-  const seen = new Set<number>();
+  // Same reasoning as parseEspn: chunked pastes can land out of order,
+  // overlap, or get accidentally re-pasted, so normalize by sorting on rank
+  // and deduping on normalized name.
+  const seen = new Set<string>();
   return players
     .filter((p) => {
-      if (seen.has(p.rank)) return false;
-      seen.add(p.rank);
+      const key = normalizeName(p.name);
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     })
     .sort((a, b) => a.rank - b.rank);
