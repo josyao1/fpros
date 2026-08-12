@@ -44,5 +44,14 @@ export function parseFpros(raw: string): FprosPlayer[] {
     }
   }
 
-  return players;
+  // Same reasoning as parseEspn: chunked pastes can land out of order or
+  // overlap, so normalize by sorting on rank and dropping duplicate ranks.
+  const seen = new Set<number>();
+  return players
+    .filter((p) => {
+      if (seen.has(p.rank)) return false;
+      seen.add(p.rank);
+      return true;
+    })
+    .sort((a, b) => a.rank - b.rank);
 }
