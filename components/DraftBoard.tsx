@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import DraftBoardTable from "./DraftBoardTable";
 import { getRankings } from "@/app/actions";
-import { normalizeName } from "@/lib/match";
+import { normalizeName, sortComparison, RankSource } from "@/lib/match";
 import { ComparisonRow, PlayerRankingRow, ScoringFormat } from "@/lib/types";
 
 const TABS: { id: ScoringFormat; label: string }[] = [
@@ -45,6 +45,7 @@ export default function DraftBoard() {
   const [isPending, startTransition] = useTransition();
   const [drafted, setDrafted] = useState<Set<string>>(new Set());
   const [hydrated, setHydrated] = useState(false);
+  const [sortBy, setSortBy] = useState<RankSource>("espn");
 
   const load = (tab: ScoringFormat) => {
     setError(null);
@@ -87,6 +88,11 @@ export default function DraftBoard() {
   const draftedCount = useMemo(
     () => rows.filter((r) => drafted.has(keyFor(r))).length,
     [rows, drafted]
+  );
+
+  const sortedRows = useMemo(
+    () => sortComparison(rows, sortBy),
+    [rows, sortBy]
   );
 
   return (
@@ -142,6 +148,27 @@ export default function DraftBoard() {
         </div>
       </div>
 
+      {rows.length > 0 && (
+        <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <span>Sort by</span>
+          <div className="flex rounded-full border border-zinc-800 bg-zinc-900 p-0.5">
+            {(["espn", "fpros"] as RankSource[]).map((source) => (
+              <button
+                key={source}
+                onClick={() => setSortBy(source)}
+                className={`rounded-full px-3 py-1 font-medium transition-colors ${
+                  sortBy === source
+                    ? "bg-zinc-100 text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {source === "espn" ? "ESPN" : "FantasyPros"}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="rounded-lg border border-red-900 bg-red-950 px-4 py-3 text-sm text-red-400">
           {error}
@@ -156,7 +183,8 @@ export default function DraftBoard() {
       )}
 
       <DraftBoardTable
-        rows={rows}
+        rows={sortedRows}
+        sortBy={sortBy}
         draftedKeys={drafted}
         keyFor={keyFor}
         onToggle={toggleDrafted}

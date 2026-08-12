@@ -48,3 +48,30 @@ export function buildComparison(
     };
   });
 }
+
+export type RankSource = "espn" | "fpros";
+
+/**
+ * Re-orders rows by either ESPN rank or FantasyPros rank. Players with no
+ * FPros match (fprosRank === null) have no valid position in FPros order,
+ * so they're pushed to the end, sorted by ESPN rank among themselves.
+ */
+export function sortComparison(
+  rows: ComparisonRow[],
+  by: RankSource
+): ComparisonRow[] {
+  const sorted = [...rows];
+  if (by === "espn") {
+    sorted.sort((a, b) => a.espnRank - b.espnRank);
+    return sorted;
+  }
+  sorted.sort((a, b) => {
+    if (a.fprosRank === null && b.fprosRank === null) {
+      return a.espnRank - b.espnRank;
+    }
+    if (a.fprosRank === null) return 1;
+    if (b.fprosRank === null) return -1;
+    return a.fprosRank - b.fprosRank;
+  });
+  return sorted;
+}

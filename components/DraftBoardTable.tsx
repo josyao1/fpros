@@ -1,6 +1,7 @@
 "use client";
 
 import { ComparisonRow } from "@/lib/types";
+import { RankSource } from "@/lib/match";
 
 const POS_STYLES: Record<string, string> = {
   QB: "bg-red-500/15 text-red-400 border-red-500/30",
@@ -53,6 +54,7 @@ function DiffBadge({ diff, dimmed }: { diff: number | null; dimmed: boolean }) {
 
 interface DraftBoardTableProps {
   rows: ComparisonRow[];
+  sortBy: RankSource;
   draftedKeys: Set<string>;
   keyFor: (row: ComparisonRow) => string;
   onToggle: (key: string) => void;
@@ -60,6 +62,7 @@ interface DraftBoardTableProps {
 
 export default function DraftBoardTable({
   rows,
+  sortBy,
   draftedKeys,
   keyFor,
   onToggle,
@@ -73,9 +76,21 @@ export default function DraftBoardTable({
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-zinc-800 bg-zinc-900 text-left text-[11px] uppercase tracking-wider text-zinc-500">
               <th className="w-10 px-3 py-2.5 font-medium"></th>
-              <th className="w-14 px-3 py-2.5 font-medium">ESPN</th>
+              <th
+                className={`w-14 px-3 py-2.5 font-medium ${
+                  sortBy === "espn" ? "text-zinc-300" : ""
+                }`}
+              >
+                ESPN
+              </th>
               <th className="px-3 py-2.5 font-medium">Player</th>
-              <th className="w-16 px-3 py-2.5 text-right font-medium">FPros</th>
+              <th
+                className={`w-16 px-3 py-2.5 text-right font-medium ${
+                  sortBy === "fpros" ? "text-zinc-300" : ""
+                }`}
+              >
+                FPros
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -101,7 +116,11 @@ export default function DraftBoardTable({
                   </td>
                   <td
                     className={`px-3 py-2.5 tabular-nums ${
-                      drafted ? "text-zinc-700" : "text-zinc-500"
+                      drafted
+                        ? "text-zinc-700"
+                        : sortBy === "espn"
+                        ? "font-semibold text-zinc-200"
+                        : "text-zinc-500"
                     }`}
                   >
                     {row.espnRank}
@@ -130,7 +149,11 @@ export default function DraftBoardTable({
                   </td>
                   <td
                     className={`px-3 py-2.5 text-right tabular-nums ${
-                      drafted ? "text-zinc-700" : "text-zinc-500"
+                      drafted
+                        ? "text-zinc-700"
+                        : sortBy === "fpros"
+                        ? "font-semibold text-zinc-200"
+                        : "text-zinc-500"
                     }`}
                   >
                     {row.fprosRank ?? "—"}
