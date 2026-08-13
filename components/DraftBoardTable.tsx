@@ -86,6 +86,15 @@ function initialsFor(name: string): string {
     .toUpperCase();
 }
 
+// "TreVeyon Henderson" -> "T. Henderson". Keeps the number jump legible in
+// a narrow panel instead of the name wrapping onto a second line.
+function abbreviateName(name: string): string {
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length <= 1) return name;
+  const [first, ...rest] = parts;
+  return `${first[0]}. ${rest.join(" ")}`;
+}
+
 function Headshot({
   espnId,
   name,
@@ -197,7 +206,7 @@ export default function DraftBoardTable({
     : "min-w-[380px]";
 
   return (
-    <div className="overflow-hidden rounded-md border-[1.5px] border-[#f5f0e1]/15 bg-[#1a3423]">
+    <div className="@container overflow-hidden rounded-md border-[1.5px] border-[#f5f0e1]/15 bg-[#1a3423]">
       <div ref={containerRef} className="max-h-[75vh] overflow-auto">
         <table className={`w-full border-collapse text-sm ${minW}`}>
           <thead className="sticky top-0 z-10">
@@ -279,17 +288,20 @@ export default function DraftBoardTable({
                         {starred ? "★" : "☆"}
                       </button>
                       <span
-                        className={`font-bold ${nameCls} ${
+                        className={`whitespace-nowrap font-bold ${nameCls} ${
                           drafted
                             ? "text-[#6f8375] line-through decoration-[#6f8375]/60"
                             : "text-[#f5f0e1]"
                         }`}
                       >
-                        {row.name}
+                        <span className="hidden @[420px]:inline">{row.name}</span>
+                        <span className="@[420px]:hidden">{abbreviateName(row.name)}</span>
                       </span>
                       <PosBadge pos={row.pos} dimmed={drafted} compact={compact} />
                       <span
-                        className={teamCls + " " + (drafted ? "text-[#6f8375]/60" : "text-[#6f8375]")}
+                        className={`hidden whitespace-nowrap @[520px]:inline ${teamCls} ${
+                          drafted ? "text-[#6f8375]/60" : "text-[#6f8375]"
+                        }`}
                       >
                         {row.team}
                       </span>
