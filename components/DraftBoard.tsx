@@ -27,6 +27,7 @@ function toComparisonRow(row: PlayerRankingRow): ComparisonRow {
     avgPick: row.avg_pick,
     fprosRank: row.fpros_rank,
     diff: row.diff,
+    espnId: row.espn_id,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ComparisonRow } from "@/lib/types";
 import { RankSource } from "@/lib/match";
 
@@ -53,6 +53,55 @@ function DiffBadge({ diff, dimmed }: { diff: number | null; dimmed: boolean }) {
   );
 }
 
+function initialsFor(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function Headshot({
+  espnId,
+  name,
+  pos,
+  dimmed,
+}: {
+  espnId: string | null | undefined;
+  name: string;
+  pos: string;
+  dimmed: boolean;
+}) {
+  const [errored, setErrored] = useState(false);
+  const posStyle = POS_STYLES[pos.toUpperCase()] ?? POS_STYLES.FLEX;
+
+  if (!espnId || errored) {
+    return (
+      <div
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold ${
+          dimmed ? "border-zinc-700 bg-zinc-800/40 text-zinc-600" : posStyle
+        }`}
+      >
+        {initialsFor(name)}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={`https://a.espncdn.com/i/headshots/nfl/players/full/${espnId}.png`}
+      alt=""
+      loading="lazy"
+      onError={() => setErrored(true)}
+      className={`h-7 w-7 shrink-0 rounded-full bg-zinc-800 object-cover object-top ${
+        dimmed ? "opacity-40 grayscale" : ""
+      }`}
+    />
+  );
+}
+
 interface DraftBoardTableProps {
   rows: ComparisonRow[];
   sortBy: RankSource;
@@ -81,7 +130,7 @@ export default function DraftBoardTable({
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
       <div className="max-h-[75vh] overflow-auto">
-        <table className="w-full min-w-[480px] border-collapse text-sm">
+        <table className="w-full min-w-[520px] border-collapse text-sm">
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-zinc-800 bg-zinc-900 text-left text-[11px] uppercase tracking-wider text-zinc-500">
               <th className="w-10 px-3 py-2.5 font-medium"></th>
@@ -146,6 +195,12 @@ export default function DraftBoardTable({
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
+                      <Headshot
+                        espnId={row.espnId}
+                        name={row.name}
+                        pos={row.pos}
+                        dimmed={drafted}
+                      />
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

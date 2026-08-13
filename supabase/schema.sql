@@ -11,9 +11,14 @@ create table if not exists player_rankings (
   fpros_rank integer,
   avg_pick numeric,
   diff integer,
+  espn_id text,
   updated_at timestamptz not null default now(),
   unique (normalized_name, scoring_format)
 );
+
+-- If you already ran this file before espn_id existed, run this too
+-- (safe to re-run, no-ops once the column is there):
+alter table player_rankings add column if not exists espn_id text;
 
 create index if not exists player_rankings_format_rank_idx
   on player_rankings (scoring_format, espn_rank);

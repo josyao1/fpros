@@ -21,6 +21,7 @@ export interface ComparisonRow {
   avgPick: number | null;
   fprosRank: number | null;
   diff: number | null;
+  espnId?: string | null;
 }
 
 export type ScoringFormat = "ppr" | "half-ppr";
@@ -40,5 +41,6 @@ export interface PlayerRankingRow {
   fpros_rank: number | null;
   avg_pick: number | null;
   diff: number | null;
+  espn_id: string | null;
   updated_at: string;
 }
