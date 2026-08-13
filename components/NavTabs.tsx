@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const LINKS = [
-  { href: "/update-rankings", label: "Update Rankings" },
-  { href: "/draft-board", label: "Draft Board" },
-];
+// Update Rankings is intentionally not listed here — it's still reachable
+// at /update-rankings, just not linked anywhere in the UI.
+const LINKS = [{ href: "/draft-board", label: "Draft Board" }];
 
 export default function NavTabs() {
   const pathname = usePathname();
