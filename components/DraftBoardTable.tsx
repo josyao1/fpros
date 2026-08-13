@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { ComparisonRow } from "@/lib/types";
 import { RankSource } from "@/lib/match";
 
@@ -125,11 +125,33 @@ export default function DraftBoardTable({
   hoveredKey = null,
   setHoveredKey,
 }: DraftBoardTableProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // When the hovered player isn't visible in this panel (e.g. they're
+  // scrolled off in the other order), bring their row into view.
+  useEffect(() => {
+    if (!hoveredKey || !containerRef.current) return;
+    const container = containerRef.current;
+    const el = container.querySelector<HTMLElement>(
+      `[data-key="${CSS.escape(hoveredKey)}"]`
+    );
+    if (!el) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const isVisible =
+      elRect.top >= containerRect.top && elRect.bottom <= containerRect.bottom;
+
+    if (!isVisible) {
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  }, [hoveredKey]);
+
   if (rows.length === 0) return null;
 
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-      <div className="max-h-[75vh] overflow-auto">
+      <div ref={containerRef} className="max-h-[75vh] overflow-auto">
         <table className="w-full min-w-[520px] border-collapse text-sm">
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-zinc-800 bg-zinc-900 text-left text-[11px] uppercase tracking-wider text-zinc-500">
@@ -160,6 +182,7 @@ export default function DraftBoardTable({
               return (
                 <tr
                   key={key}
+                  data-key={key}
                   onClick={() => onToggle(key)}
                   onMouseEnter={() => setHoveredKey?.(key)}
                   onMouseLeave={() =>
