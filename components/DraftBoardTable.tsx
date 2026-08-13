@@ -228,10 +228,7 @@ export default function DraftBoardTable({
                 <tr
                   key={key}
                   data-key={key}
-                  onClick={() => {
-                    onToggle(key);
-                    setLinkedKey?.(key);
-                  }}
+                  onClick={() => setLinkedKey?.(key)}
                   className={`cursor-pointer border-b border-[#f5f0e1]/8 transition-colors last:border-0 ${
                     drafted
                       ? "bg-[#152a1d]"

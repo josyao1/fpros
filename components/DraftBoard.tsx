@@ -212,8 +212,9 @@ export default function DraftBoard() {
           Draft Board
         </h1>
         <p className="mt-2 max-w-xl text-sm text-[#a9bcac]">
-          Last saved rankings from Update Rankings. Click a player or their
-          checkbox to mark them drafted.
+          Last saved rankings from Update Rankings. Check a player&apos;s box
+          to mark them drafted; click anywhere else on their row to find them
+          on the other side.
         </p>
       </header>
 
