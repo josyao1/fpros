@@ -4,23 +4,25 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { ComparisonRow } from "@/lib/types";
 import { RankSource } from "@/lib/match";
 
-const POS_STYLES: Record<string, string> = {
-  QB: "bg-red-500/15 text-red-400 border-red-500/30",
-  RB: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  WR: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  TE: "bg-orange-500/15 text-orange-400 border-orange-500/30",
-  K: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
-  DST: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  "D/ST": "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  FLEX: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+const PENNANT_CLIP = "[clip-path:polygon(0_0,82%_0,100%_50%,82%_100%,0_100%)]";
+
+const POS_FILL: Record<string, string> = {
+  QB: "bg-[#e79aa8]",
+  RB: "bg-[#8fd6a2]",
+  WR: "bg-[#9cc4e8]",
+  TE: "bg-[#e8b87e]",
+  K: "bg-[#c9c2ad]",
+  DST: "bg-[#c6a9e8]",
+  "D/ST": "bg-[#c6a9e8]",
+  FLEX: "bg-[#c9c2ad]",
 };
 
 function PosBadge({ pos, dimmed }: { pos: string; dimmed: boolean }) {
-  const style = POS_STYLES[pos.toUpperCase()] ?? POS_STYLES.FLEX;
+  const fill = POS_FILL[pos.toUpperCase()] ?? POS_FILL.FLEX;
   return (
     <span
-      className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-        dimmed ? "border-zinc-700 bg-zinc-800/40 text-zinc-600" : style
+      className={`inline-flex items-center py-0.5 pl-1.5 pr-2.5 text-[10px] font-extrabold uppercase tracking-wide text-[#0f2116] ${PENNANT_CLIP} ${
+        dimmed ? "bg-[#6f8375]/40" : fill
       }`}
     >
       {pos || "—"}
@@ -30,20 +32,24 @@ function PosBadge({ pos, dimmed }: { pos: string; dimmed: boolean }) {
 
 function DiffBadge({ diff, dimmed }: { diff: number | null; dimmed: boolean }) {
   if (diff === null) {
-    return <span className="text-[11px] text-zinc-600">no match</span>;
+    return <span className="text-[11px] text-[#6f8375]">no match</span>;
   }
   if (diff === 0) {
-    return <span className="text-[11px] text-zinc-500">even</span>;
+    return (
+      <span className="inline-flex items-center rounded-full border border-dashed border-[#f5f0e1]/25 px-2 py-0.5 text-[11px] font-bold text-[#6f8375]">
+        even
+      </span>
+    );
   }
   const isValue = diff > 0;
   return (
     <span
-      className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${
+      className={`inline-flex items-center gap-0.5 rounded-full border border-dashed px-2 py-0.5 text-[11px] font-extrabold tabular-nums ${
         dimmed
-          ? "bg-zinc-800/40 text-zinc-600"
+          ? "border-[#f5f0e1]/15 text-[#6f8375]"
           : isValue
-          ? "bg-emerald-500/15 text-emerald-400"
-          : "bg-red-500/15 text-red-400"
+          ? "border-[#8fd6a2] text-[#8fd6a2]"
+          : "border-[#e58b84] text-[#e58b84]"
       }`}
       title={isValue ? "Value: FPros ranks them higher than ESPN ADP" : "Reach: ESPN ADP is ahead of FPros"}
     >
@@ -66,7 +72,6 @@ function initialsFor(name: string): string {
 function Headshot({
   espnId,
   name,
-  pos,
   dimmed,
 }: {
   espnId: string | null | undefined;
@@ -75,13 +80,14 @@ function Headshot({
   dimmed: boolean;
 }) {
   const [errored, setErrored] = useState(false);
-  const posStyle = POS_STYLES[pos.toUpperCase()] ?? POS_STYLES.FLEX;
 
   if (!espnId || errored) {
     return (
       <div
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold ${
-          dimmed ? "border-zinc-700 bg-zinc-800/40 text-zinc-600" : posStyle
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed text-[10px] font-extrabold ${
+          dimmed
+            ? "border-[#f5f0e1]/15 bg-[#1c3a26] text-[#6f8375]"
+            : "border-[#f5f0e1]/30 bg-[#1c3a26] text-[#a9bcac]"
         }`}
       >
         {initialsFor(name)}
@@ -95,7 +101,7 @@ function Headshot({
       alt=""
       loading="lazy"
       onError={() => setErrored(true)}
-      className={`h-7 w-7 shrink-0 rounded-full bg-zinc-800 object-cover object-top ${
+      className={`h-7 w-7 shrink-0 rounded-full bg-[#1c3a26] object-cover object-top ${
         dimmed ? "opacity-40 grayscale" : ""
       }`}
     />
@@ -152,7 +158,7 @@ export default function DraftBoardTable({
   if (rows.length === 0) return null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+    <div className="overflow-hidden rounded-md border-[1.5px] border-[#f5f0e1]/15 bg-[#1a3423]">
       <div ref={containerRef} className="max-h-[75vh] overflow-auto">
         <table
           className={`w-full border-collapse text-sm ${
@@ -160,14 +166,14 @@ export default function DraftBoardTable({
           }`}
         >
           <thead className="sticky top-0 z-10">
-            <tr className="border-b border-zinc-800 bg-zinc-900 text-left text-[11px] uppercase tracking-wider text-zinc-500">
-              <th className="w-10 px-3 py-2.5 font-medium"></th>
-              <th className="w-14 px-3 py-2.5 font-medium text-zinc-300">
+            <tr className="border-b-[1.5px] border-dashed border-[#f5f0e1]/20 bg-[#1a3423] text-left text-[11px] uppercase tracking-wider text-[#6f8375]">
+              <th className="w-10 px-3 py-2.5 font-bold"></th>
+              <th className="w-14 px-3 py-2.5 font-bold text-[#e8c257]">
                 {sortBy === "espn" ? "ESPN" : "FPros"}
               </th>
-              <th className="px-3 py-2.5 font-medium">Player</th>
+              <th className="px-3 py-2.5 font-bold">Player</th>
               {showSecondaryRank && (
-                <th className="w-16 px-3 py-2.5 text-right font-medium">
+                <th className="w-16 px-3 py-2.5 text-right font-bold">
                   {sortBy === "espn" ? "FPros" : "ESPN"}
                 </th>
               )}
@@ -192,12 +198,12 @@ export default function DraftBoardTable({
                   onMouseLeave={() =>
                     setHoveredKey?.((prev) => (prev === key ? null : prev))
                   }
-                  className={`cursor-pointer border-b border-zinc-900 transition-colors last:border-0 ${
+                  className={`cursor-pointer border-b border-[#f5f0e1]/8 transition-colors last:border-0 ${
                     drafted
-                      ? "bg-zinc-950"
+                      ? "bg-[#152a1d]"
                       : isHovered
-                      ? "bg-blue-500/10 ring-1 ring-inset ring-blue-500/40"
-                      : "hover:bg-zinc-900/60"
+                      ? "bg-[#e8c257]/10 ring-1 ring-inset ring-[#e8c257]/50"
+                      : "hover:bg-[#204029]"
                   }`}
                 >
                   <td className="px-3 py-2.5">
@@ -206,12 +212,12 @@ export default function DraftBoardTable({
                       checked={drafted}
                       onChange={() => onToggle(key)}
                       onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 accent-emerald-500"
+                      className="h-4 w-4 rounded border-[#f5f0e1]/40 bg-[#1c3a26] accent-[#8fd6a2]"
                     />
                   </td>
                   <td
                     className={`px-3 py-2.5 tabular-nums ${
-                      drafted ? "text-zinc-700" : "font-semibold text-zinc-200"
+                      drafted ? "text-[#6f8375]" : "font-extrabold text-[#e8c257]"
                     }`}
                   >
                     {primaryRank ?? "—"}
@@ -232,17 +238,17 @@ export default function DraftBoardTable({
                         aria-label={starred ? "Unstar player" : "Star player"}
                         className={`text-base leading-none transition-colors ${
                           starred
-                            ? "text-amber-400"
-                            : "text-zinc-700 hover:text-zinc-400"
+                            ? "text-[#e8c257]"
+                            : "text-[#f5f0e1]/25 hover:text-[#f5f0e1]/50"
                         }`}
                       >
                         {starred ? "★" : "☆"}
                       </button>
                       <span
-                        className={`font-medium ${
+                        className={`font-bold ${
                           drafted
-                            ? "text-zinc-600 line-through decoration-zinc-700"
-                            : "text-zinc-100"
+                            ? "text-[#6f8375] line-through decoration-[#6f8375]/60"
+                            : "text-[#f5f0e1]"
                         }`}
                       >
                         {row.name}
@@ -250,7 +256,7 @@ export default function DraftBoardTable({
                       <PosBadge pos={row.pos} dimmed={drafted} />
                       <span
                         className={`text-xs ${
-                          drafted ? "text-zinc-700" : "text-zinc-500"
+                          drafted ? "text-[#6f8375]/60" : "text-[#6f8375]"
                         }`}
                       >
                         {row.team}
@@ -261,7 +267,7 @@ export default function DraftBoardTable({
                   {showSecondaryRank && (
                     <td
                       className={`px-3 py-2.5 text-right tabular-nums ${
-                        drafted ? "text-zinc-700" : "text-zinc-500"
+                        drafted ? "text-[#6f8375]/60" : "text-[#6f8375]"
                       }`}
                     >
                       {secondaryRank ?? "—"}

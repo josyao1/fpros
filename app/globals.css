@@ -24,3 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Sideline-whiteboard turf texture for the Draft Board: faint mowed-grass
+   stripes over a turf-green gradient. Scoped to its own class so it never
+   leaks into the light-mode Update Rankings page. */
+.field-bg {
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(245, 240, 225, 0.03) 0px,
+      rgba(245, 240, 225, 0.03) 1px,
+      transparent 1px,
+      transparent 42px
+    ),
+    linear-gradient(180deg, #142a1c 0%, #0f2116 100%);
+  background-attachment: fixed;
+}

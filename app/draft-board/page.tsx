@@ -2,7 +2,7 @@ import DraftBoard from "@/components/DraftBoard";
 
 export default function DraftBoardPage() {
   return (
-    <div className="flex flex-1 flex-col bg-black">
+    <div className="field-bg flex flex-1 flex-col">
       <DraftBoard />
     </div>
   );
