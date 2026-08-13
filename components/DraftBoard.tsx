@@ -267,6 +267,7 @@ export default function DraftBoard() {
               onToggleStar={toggleStar}
               hoveredKey={hoveredKey}
               setHoveredKey={setHoveredKey}
+              showSecondaryRank={false}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -283,6 +284,7 @@ export default function DraftBoard() {
               onToggleStar={toggleStar}
               hoveredKey={hoveredKey}
               setHoveredKey={setHoveredKey}
+              showSecondaryRank={false}
             />
           </div>
         </div>

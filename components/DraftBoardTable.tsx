@@ -112,6 +112,7 @@ interface DraftBoardTableProps {
   onToggleStar: (key: string) => void;
   hoveredKey?: string | null;
   setHoveredKey?: Dispatch<SetStateAction<string | null>>;
+  showSecondaryRank?: boolean;
 }
 
 export default function DraftBoardTable({
@@ -124,6 +125,7 @@ export default function DraftBoardTable({
   onToggleStar,
   hoveredKey = null,
   setHoveredKey,
+  showSecondaryRank = true,
 }: DraftBoardTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -152,7 +154,11 @@ export default function DraftBoardTable({
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
       <div ref={containerRef} className="max-h-[75vh] overflow-auto">
-        <table className="w-full min-w-[520px] border-collapse text-sm">
+        <table
+          className={`w-full border-collapse text-sm ${
+            showSecondaryRank ? "min-w-[520px]" : "min-w-[380px]"
+          }`}
+        >
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-zinc-800 bg-zinc-900 text-left text-[11px] uppercase tracking-wider text-zinc-500">
               <th className="w-10 px-3 py-2.5 font-medium"></th>
@@ -160,9 +166,11 @@ export default function DraftBoardTable({
                 {sortBy === "espn" ? "ESPN" : "FPros"}
               </th>
               <th className="px-3 py-2.5 font-medium">Player</th>
-              <th className="w-16 px-3 py-2.5 text-right font-medium">
-                {sortBy === "espn" ? "FPros" : "ESPN"}
-              </th>
+              {showSecondaryRank && (
+                <th className="w-16 px-3 py-2.5 text-right font-medium">
+                  {sortBy === "espn" ? "FPros" : "ESPN"}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -250,13 +258,15 @@ export default function DraftBoardTable({
                       <DiffBadge diff={row.diff} dimmed={drafted} />
                     </div>
                   </td>
-                  <td
-                    className={`px-3 py-2.5 text-right tabular-nums ${
-                      drafted ? "text-zinc-700" : "text-zinc-500"
-                    }`}
-                  >
-                    {secondaryRank ?? "—"}
-                  </td>
+                  {showSecondaryRank && (
+                    <td
+                      className={`px-3 py-2.5 text-right tabular-nums ${
+                        drafted ? "text-zinc-700" : "text-zinc-500"
+                      }`}
+                    >
+                      {secondaryRank ?? "—"}
+                    </td>
+                  )}
                 </tr>
               );
             })}
