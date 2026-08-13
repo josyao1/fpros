@@ -54,6 +54,15 @@ function loadStoredSet(key: string): Set<string> {
 }
 
 type ViewMode = "single" | "side-by-side";
+type Density = "normal" | "compact";
+const DENSITY_KEY = "ff-density";
+
+function loadDensity(): Density {
+  if (typeof window === "undefined") return "normal";
+  return window.localStorage.getItem(DENSITY_KEY) === "compact"
+    ? "compact"
+    : "normal";
+}
 
 export default function DraftBoard() {
   const [activeTab, setActiveTab] = useState<ScoringFormat>("ppr");
@@ -66,6 +75,16 @@ export default function DraftBoard() {
   const [sortBy, setSortBy] = useState<RankSource>("espn");
   const [viewMode, setViewMode] = useState<ViewMode>("single");
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [density, setDensity] = useState<Density>("normal");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    setDensity(loadDensity());
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(DENSITY_KEY, density);
+  }, [density]);
 
   const load = (tab: ScoringFormat) => {
     setError(null);
@@ -238,6 +257,68 @@ export default function DraftBoard() {
           >
             {isPending ? "Refreshing..." : "Refresh"}
           </button>
+          <div className="relative">
+            <button
+              onClick={() => setSettingsOpen((v) => !v)}
+              aria-label="Settings"
+              aria-expanded={settingsOpen}
+              className={`flex h-6 w-6 items-center justify-center rounded-full border border-dashed transition-colors ${
+                settingsOpen
+                  ? "border-[#e8c257] text-[#e8c257]"
+                  : "border-[#f5f0e1]/25 text-[#a9bcac] hover:text-[#f5f0e1]"
+              }`}
+            >
+              <svg
+                className="h-3.5 w-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
+            {settingsOpen && (
+              <>
+                <button
+                  aria-label="Close settings"
+                  onClick={() => setSettingsOpen(false)}
+                  className="fixed inset-0 z-10 cursor-default"
+                />
+                <div className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-dashed border-[#f5f0e1]/25 bg-[#1a3423] p-3 text-left shadow-lg">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#6f8375]">
+                    Row density
+                  </div>
+                  <p className="mt-1 text-[11px] text-[#a9bcac]">
+                    Zoom out to thin rows and columns so more fits on screen.
+                  </p>
+                  <div className="mt-2 flex gap-1 rounded-full border border-dashed border-[#f5f0e1]/25 p-0.5">
+                    {(
+                      [
+                        { id: "normal", label: "Normal" },
+                        { id: "compact", label: "Compact" },
+                      ] as { id: Density; label: string }[]
+                    ).map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setDensity(opt.id)}
+                        className={`flex-1 rounded-full px-2 py-1 text-xs font-bold transition-colors ${
+                          density === opt.id
+                            ? "bg-[#e8c257] text-[#0f2116]"
+                            : "text-[#a9bcac] hover:text-[#f5f0e1]"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -382,6 +463,7 @@ export default function DraftBoard() {
           keyFor={keyFor}
           onToggle={toggleDrafted}
           onToggleStar={toggleStar}
+          compact={density === "compact"}
         />
       ) : (
         <div className="relative mx-auto grid w-full max-w-5xl grid-cols-2 gap-2 sm:gap-3">
@@ -405,6 +487,7 @@ export default function DraftBoard() {
               hoveredKey={hoveredKey}
               setHoveredKey={setHoveredKey}
               showSecondaryRank={false}
+              compact={density === "compact"}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -422,6 +505,7 @@ export default function DraftBoard() {
               hoveredKey={hoveredKey}
               setHoveredKey={setHoveredKey}
               showSecondaryRank={false}
+              compact={density === "compact"}
             />
           </div>
         </div>
