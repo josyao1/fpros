@@ -5,6 +5,7 @@ import {
   SetStateAction,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -126,6 +127,27 @@ export default function DraftBoard() {
 
   const [query, setQuery] = useState("");
   const [posFilter, setPosFilter] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Typing anywhere on the page (not already inside a text field) jumps
+  // straight into search, so you can just start typing a player's name
+  // mid-draft without having to click the box first.
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key.length !== 1) return;
+      const target = e.target as HTMLElement | null;
+      const isEditable =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+      if (isEditable) return;
+      searchInputRef.current?.focus();
+      setQuery((prev) => prev + e.key);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const availablePositions = useMemo(() => {
     const present = new Set(
@@ -234,6 +256,7 @@ export default function DraftBoard() {
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
+              ref={searchInputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
