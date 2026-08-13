@@ -156,20 +156,12 @@ export default function DraftBoardTable({
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-zinc-800 bg-zinc-900 text-left text-[11px] uppercase tracking-wider text-zinc-500">
               <th className="w-10 px-3 py-2.5 font-medium"></th>
-              <th
-                className={`w-14 px-3 py-2.5 font-medium ${
-                  sortBy === "espn" ? "text-zinc-300" : ""
-                }`}
-              >
-                ESPN
+              <th className="w-14 px-3 py-2.5 font-medium text-zinc-300">
+                {sortBy === "espn" ? "ESPN" : "FPros"}
               </th>
               <th className="px-3 py-2.5 font-medium">Player</th>
-              <th
-                className={`w-16 px-3 py-2.5 text-right font-medium ${
-                  sortBy === "fpros" ? "text-zinc-300" : ""
-                }`}
-              >
-                FPros
+              <th className="w-16 px-3 py-2.5 text-right font-medium">
+                {sortBy === "espn" ? "FPros" : "ESPN"}
               </th>
             </tr>
           </thead>
@@ -179,6 +171,10 @@ export default function DraftBoardTable({
               const drafted = draftedKeys.has(key);
               const starred = starredKeys.has(key);
               const isHovered = hoveredKey === key;
+              const primaryRank =
+                sortBy === "espn" ? row.espnRank : row.fprosRank;
+              const secondaryRank =
+                sortBy === "espn" ? row.fprosRank : row.espnRank;
               return (
                 <tr
                   key={key}
@@ -207,14 +203,10 @@ export default function DraftBoardTable({
                   </td>
                   <td
                     className={`px-3 py-2.5 tabular-nums ${
-                      drafted
-                        ? "text-zinc-700"
-                        : sortBy === "espn"
-                        ? "font-semibold text-zinc-200"
-                        : "text-zinc-500"
+                      drafted ? "text-zinc-700" : "font-semibold text-zinc-200"
                     }`}
                   >
-                    {row.espnRank}
+                    {primaryRank ?? "—"}
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
@@ -260,14 +252,10 @@ export default function DraftBoardTable({
                   </td>
                   <td
                     className={`px-3 py-2.5 text-right tabular-nums ${
-                      drafted
-                        ? "text-zinc-700"
-                        : sortBy === "fpros"
-                        ? "font-semibold text-zinc-200"
-                        : "text-zinc-500"
+                      drafted ? "text-zinc-700" : "text-zinc-500"
                     }`}
                   >
-                    {row.fprosRank ?? "—"}
+                    {secondaryRank ?? "—"}
                   </td>
                 </tr>
               );
