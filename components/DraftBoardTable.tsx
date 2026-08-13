@@ -138,8 +138,8 @@ interface DraftBoardTableProps {
   keyFor: (row: ComparisonRow) => string;
   onToggle: (key: string) => void;
   onToggleStar: (key: string) => void;
-  hoveredKey?: string | null;
-  setHoveredKey?: Dispatch<SetStateAction<string | null>>;
+  linkedKey?: string | null;
+  setLinkedKey?: Dispatch<SetStateAction<string | null>>;
   showSecondaryRank?: boolean;
   compact?: boolean;
 }
@@ -152,20 +152,20 @@ export default function DraftBoardTable({
   keyFor,
   onToggle,
   onToggleStar,
-  hoveredKey = null,
-  setHoveredKey,
+  linkedKey = null,
+  setLinkedKey,
   showSecondaryRank = true,
   compact = false,
 }: DraftBoardTableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // When the hovered player isn't visible in this panel (e.g. they're
+  // When the clicked player isn't visible in this panel (e.g. they're
   // scrolled off in the other order), bring their row into view.
   useEffect(() => {
-    if (!hoveredKey || !containerRef.current) return;
+    if (!linkedKey || !containerRef.current) return;
     const container = containerRef.current;
     const el = container.querySelector<HTMLElement>(
-      `[data-key="${CSS.escape(hoveredKey)}"]`
+      `[data-key="${CSS.escape(linkedKey)}"]`
     );
     if (!el) return;
 
@@ -177,7 +177,7 @@ export default function DraftBoardTable({
     if (!isVisible) {
       el.scrollIntoView({ block: "center", behavior: "smooth" });
     }
-  }, [hoveredKey]);
+  }, [linkedKey]);
 
   if (rows.length === 0) return null;
 
@@ -219,7 +219,7 @@ export default function DraftBoardTable({
               const key = keyFor(row);
               const drafted = draftedKeys.has(key);
               const starred = starredKeys.has(key);
-              const isHovered = hoveredKey === key;
+              const isLinked = linkedKey === key;
               const primaryRank =
                 sortBy === "espn" ? row.espnRank : row.fprosRank;
               const secondaryRank =
@@ -228,15 +228,14 @@ export default function DraftBoardTable({
                 <tr
                   key={key}
                   data-key={key}
-                  onClick={() => onToggle(key)}
-                  onMouseEnter={() => setHoveredKey?.(key)}
-                  onMouseLeave={() =>
-                    setHoveredKey?.((prev) => (prev === key ? null : prev))
-                  }
+                  onClick={() => {
+                    onToggle(key);
+                    setLinkedKey?.(key);
+                  }}
                   className={`cursor-pointer border-b border-[#f5f0e1]/8 transition-colors last:border-0 ${
                     drafted
                       ? "bg-[#152a1d]"
-                      : isHovered
+                      : isLinked
                       ? "bg-[#e8c257]/10 ring-1 ring-inset ring-[#e8c257]/50"
                       : "hover:bg-[#204029]"
                   }`}

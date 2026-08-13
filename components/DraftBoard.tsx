@@ -74,7 +74,7 @@ export default function DraftBoard() {
   const [hydrated, setHydrated] = useState(false);
   const [sortBy, setSortBy] = useState<RankSource>("espn");
   const [viewMode, setViewMode] = useState<ViewMode>("single");
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [linkedKey, setLinkedKey] = useState<string | null>(null);
   const [density, setDensity] = useState<Density>("normal");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -484,8 +484,8 @@ export default function DraftBoard() {
               keyFor={keyFor}
               onToggle={toggleDrafted}
               onToggleStar={toggleStar}
-              hoveredKey={hoveredKey}
-              setHoveredKey={setHoveredKey}
+              linkedKey={linkedKey}
+              setLinkedKey={setLinkedKey}
               showSecondaryRank={false}
               compact={density === "compact"}
             />
@@ -502,8 +502,8 @@ export default function DraftBoard() {
               keyFor={keyFor}
               onToggle={toggleDrafted}
               onToggleStar={toggleStar}
-              hoveredKey={hoveredKey}
-              setHoveredKey={setHoveredKey}
+              linkedKey={linkedKey}
+              setLinkedKey={setLinkedKey}
               showSecondaryRank={false}
               compact={density === "compact"}
             />
