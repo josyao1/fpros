@@ -384,8 +384,8 @@ export default function DraftBoard() {
           onToggleStar={toggleStar}
         />
       ) : (
-        <div className="relative mx-auto grid w-full max-w-5xl grid-cols-1 gap-3 md:grid-cols-2">
-          <div className="pointer-events-none absolute inset-y-10 left-1/2 hidden w-0 border-l-2 border-dashed border-[#f5f0e1]/20 md:block">
+        <div className="relative mx-auto grid w-full max-w-5xl grid-cols-2 gap-2 sm:gap-3">
+          <div className="pointer-events-none absolute inset-y-10 left-1/2 block w-0 border-l-2 border-dashed border-[#f5f0e1]/20">
             <span className="absolute -left-2.5 -top-6 text-[.65rem] font-extrabold text-[#6f8375]">
               50
             </span>
