@@ -61,6 +61,7 @@ export default function DraftBoard() {
   const [hydrated, setHydrated] = useState(false);
   const [sortBy, setSortBy] = useState<RankSource>("espn");
   const [viewMode, setViewMode] = useState<ViewMode>("single");
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const load = (tab: ScoringFormat) => {
     setError(null);
@@ -250,7 +251,7 @@ export default function DraftBoard() {
           onToggleStar={toggleStar}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-3 md:grid-cols-2">
           <div className="flex flex-col gap-2">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
               ESPN Order
@@ -263,6 +264,8 @@ export default function DraftBoard() {
               keyFor={keyFor}
               onToggle={toggleDrafted}
               onToggleStar={toggleStar}
+              hoveredKey={hoveredKey}
+              setHoveredKey={setHoveredKey}
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -277,6 +280,8 @@ export default function DraftBoard() {
               keyFor={keyFor}
               onToggle={toggleDrafted}
               onToggleStar={toggleStar}
+              hoveredKey={hoveredKey}
+              setHoveredKey={setHoveredKey}
             />
           </div>
         </div>

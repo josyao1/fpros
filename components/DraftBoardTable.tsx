@@ -1,5 +1,6 @@
 "use client";
 
+import { Dispatch, SetStateAction } from "react";
 import { ComparisonRow } from "@/lib/types";
 import { RankSource } from "@/lib/match";
 
@@ -60,6 +61,8 @@ interface DraftBoardTableProps {
   keyFor: (row: ComparisonRow) => string;
   onToggle: (key: string) => void;
   onToggleStar: (key: string) => void;
+  hoveredKey?: string | null;
+  setHoveredKey?: Dispatch<SetStateAction<string | null>>;
 }
 
 export default function DraftBoardTable({
@@ -70,6 +73,8 @@ export default function DraftBoardTable({
   keyFor,
   onToggle,
   onToggleStar,
+  hoveredKey = null,
+  setHoveredKey,
 }: DraftBoardTableProps) {
   if (rows.length === 0) return null;
 
@@ -102,12 +107,21 @@ export default function DraftBoardTable({
               const key = keyFor(row);
               const drafted = draftedKeys.has(key);
               const starred = starredKeys.has(key);
+              const isHovered = hoveredKey === key;
               return (
                 <tr
                   key={key}
                   onClick={() => onToggle(key)}
+                  onMouseEnter={() => setHoveredKey?.(key)}
+                  onMouseLeave={() =>
+                    setHoveredKey?.((prev) => (prev === key ? null : prev))
+                  }
                   className={`cursor-pointer border-b border-zinc-900 transition-colors last:border-0 ${
-                    drafted ? "bg-zinc-950" : "hover:bg-zinc-900/60"
+                    drafted
+                      ? "bg-zinc-950"
+                      : isHovered
+                      ? "bg-blue-500/10 ring-1 ring-inset ring-blue-500/40"
+                      : "hover:bg-zinc-900/60"
                   }`}
                 >
                   <td className="px-3 py-2.5">
