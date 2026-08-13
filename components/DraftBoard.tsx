@@ -18,6 +18,8 @@ const TABS: { id: ScoringFormat; label: string }[] = [
   { id: "half-ppr", label: "Half PPR" },
 ];
 
+const POS_ORDER = ["QB", "RB", "WR", "TE", "FLEX", "K", "DST", "D/ST", "DEF"];
+
 function toComparisonRow(row: PlayerRankingRow): ComparisonRow {
   return {
     espnRank: row.espn_rank,
@@ -122,8 +124,41 @@ export default function DraftBoard() {
     [rows, drafted]
   );
 
-  const espnSorted = useMemo(() => sortComparison(rows, "espn"), [rows]);
-  const fprosSorted = useMemo(() => sortComparison(rows, "fpros"), [rows]);
+  const [query, setQuery] = useState("");
+  const [posFilter, setPosFilter] = useState<string | null>(null);
+
+  const availablePositions = useMemo(() => {
+    const present = new Set(
+      rows.map((r) => r.pos.toUpperCase()).filter(Boolean)
+    );
+    const ordered = POS_ORDER.filter((p) => present.has(p));
+    const extras = Array.from(present)
+      .filter((p) => !POS_ORDER.includes(p))
+      .sort();
+    return [...ordered, ...extras];
+  }, [rows]);
+
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return rows.filter((r) => {
+      const matchesQuery =
+        !q ||
+        r.name.toLowerCase().includes(q) ||
+        r.team.toLowerCase().includes(q) ||
+        r.pos.toLowerCase().includes(q);
+      const matchesPos = !posFilter || r.pos.toUpperCase() === posFilter;
+      return matchesQuery && matchesPos;
+    });
+  }, [rows, query, posFilter]);
+
+  const espnSorted = useMemo(
+    () => sortComparison(filteredRows, "espn"),
+    [filteredRows]
+  );
+  const fprosSorted = useMemo(
+    () => sortComparison(filteredRows, "fpros"),
+    [filteredRows]
+  );
   const sortedRows = sortBy === "espn" ? espnSorted : fprosSorted;
 
   return (
@@ -185,6 +220,68 @@ export default function DraftBoard() {
       </div>
 
       {rows.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full max-w-xs">
+            <svg
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6f8375]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search players, team..."
+              className="w-full rounded-full border border-dashed border-[#f5f0e1]/25 bg-[#1a3423]/60 py-2 pl-9 pr-8 text-sm text-[#f5f0e1] placeholder:text-[#6f8375] outline-none focus:border-[#e8c257]"
+            />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6f8375] hover:text-[#f5f0e1]"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {availablePositions.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              <button
+                onClick={() => setPosFilter(null)}
+                className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+                  posFilter === null
+                    ? "bg-[#e8c257] text-[#0f2116]"
+                    : "border border-dashed border-[#f5f0e1]/25 text-[#a9bcac] hover:text-[#f5f0e1]"
+                }`}
+              >
+                All
+              </button>
+              {availablePositions.map((pos) => (
+                <button
+                  key={pos}
+                  onClick={() => setPosFilter(posFilter === pos ? null : pos)}
+                  className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+                    posFilter === pos
+                      ? "bg-[#e8c257] text-[#0f2116]"
+                      : "border border-dashed border-[#f5f0e1]/25 text-[#a9bcac] hover:text-[#f5f0e1]"
+                  }`}
+                >
+                  {pos}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {rows.length > 0 && (
         <div className="flex flex-wrap items-center gap-4 text-xs text-[#a9bcac]">
           <div className="flex items-center gap-2">
             <span>View</span>
@@ -243,6 +340,13 @@ export default function DraftBoard() {
         <div className="rounded-lg border-2 border-dashed border-[#f5f0e1]/25 py-16 text-center text-sm text-[#a9bcac]">
           Nothing saved for {TABS.find((t) => t.id === activeTab)?.label} yet.
           Go to Update Rankings, paste your lists, and hit Save.
+        </div>
+      )}
+
+      {!error && !isPending && rows.length > 0 && filteredRows.length === 0 && (
+        <div className="rounded-lg border-2 border-dashed border-[#f5f0e1]/25 py-16 text-center text-sm text-[#a9bcac]">
+          No players match{query ? ` "${query}"` : ""}
+          {posFilter ? ` in ${posFilter}` : ""}.
         </div>
       )}
 
