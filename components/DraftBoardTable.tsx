@@ -56,23 +56,27 @@ interface DraftBoardTableProps {
   rows: ComparisonRow[];
   sortBy: RankSource;
   draftedKeys: Set<string>;
+  starredKeys: Set<string>;
   keyFor: (row: ComparisonRow) => string;
   onToggle: (key: string) => void;
+  onToggleStar: (key: string) => void;
 }
 
 export default function DraftBoardTable({
   rows,
   sortBy,
   draftedKeys,
+  starredKeys,
   keyFor,
   onToggle,
+  onToggleStar,
 }: DraftBoardTableProps) {
   if (rows.length === 0) return null;
 
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-      <div className="max-h-[75vh] overflow-y-auto">
-        <table className="w-full min-w-[560px] border-collapse text-sm">
+      <div className="max-h-[75vh] overflow-auto">
+        <table className="w-full min-w-[480px] border-collapse text-sm">
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-zinc-800 bg-zinc-900 text-left text-[11px] uppercase tracking-wider text-zinc-500">
               <th className="w-10 px-3 py-2.5 font-medium"></th>
@@ -97,6 +101,7 @@ export default function DraftBoardTable({
             {rows.map((row) => {
               const key = keyFor(row);
               const drafted = draftedKeys.has(key);
+              const starred = starredKeys.has(key);
               return (
                 <tr
                   key={key}
@@ -127,6 +132,20 @@ export default function DraftBoardTable({
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleStar(key);
+                        }}
+                        aria-label={starred ? "Unstar player" : "Star player"}
+                        className={`text-base leading-none transition-colors ${
+                          starred
+                            ? "text-amber-400"
+                            : "text-zinc-700 hover:text-zinc-400"
+                        }`}
+                      >
+                        {starred ? "★" : "☆"}
+                      </button>
                       <span
                         className={`font-medium ${
                           drafted
